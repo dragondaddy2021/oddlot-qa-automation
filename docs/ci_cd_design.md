@@ -2,7 +2,7 @@
 
 ## Overview
 
-The GitHub Actions workflow runs regression tests whenever code is pushed to `main` or a pull request targets `main`.
+The GitHub Actions workflow runs regression tests when code is pushed to `main`, when a pull request targets `main`, on a daily schedule (03:30 Taiwan time / UTC `30 19 * * *`, after the site's 02:00 data refresh), and on manual dispatch (`workflow_dispatch`).
 
 The tests run against the live, publicly deployed application (GitHub Pages front-end + Supabase REST back-end), so no application server needs to be started in CI.
 

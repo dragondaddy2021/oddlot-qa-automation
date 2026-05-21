@@ -115,7 +115,8 @@ pytest tests/web --headed
 
 ## CI/CD
 
-GitHub Actions runs regression tests on every push and pull request targeting `main`.
+GitHub Actions runs regression tests on every push and pull request targeting `main`,
+on a daily schedule, and on manual dispatch (see "CI Triggers & Cost" below).
 
 The workflow:
 
@@ -125,6 +126,46 @@ The workflow:
 - Generates `reports/report.html`
 - Captures a full-page screenshot for any failed browser test under `reports/screenshots/`
 - Uploads the HTML report and failure screenshots as build artifacts
+
+## CI 觸發方式與費用 (中文)
+
+### 觸發方式
+
+回歸測試的 GitHub Actions 會在以下情況自動執行:
+
+- **Push 到 `main`** — 每次推送 commit 即觸發
+- **對 `main` 的 Pull Request** — 開啟或更新 PR 時觸發
+- **每日定時** — 每天台灣時間約 03:30(UTC `30 19 * * *`),排在網站資料於凌晨 2:00 更新之後,自動驗證當天的線上推薦
+- **手動觸發** — 到 GitHub 的 Actions 分頁點「Run workflow」(`workflow_dispatch`)
+
+> 注意:公開 repo 若連續 60 天沒有任何 commit,GitHub 會自動暫停每日排程;推一個 commit 或在 Actions 分頁重新啟用即可恢復。
+
+### 費用
+
+- 本 repo 為 **public**,GitHub 標準 runner **完全免費、不限分鐘數**(含每日定時)
+- Artifact 儲存對公開 repo 免費,且預設 90 天自動過期清除
+- 被測的 GitHub Pages 與 Supabase 皆使用免費額度,測試每次僅發出少量請求
+- **實質零成本**
+
+## CI Triggers & Cost (English)
+
+### Triggers
+
+The regression workflow runs automatically on:
+
+- **Push to `main`** — on every commit pushed
+- **Pull request to `main`** — when a PR is opened or updated
+- **Daily schedule** — ~03:30 Taiwan time (UTC `30 19 * * *`), right after the site's data refreshes at 02:00, to re-validate the live recommendations
+- **Manual dispatch** — via the "Run workflow" button on the Actions tab (`workflow_dispatch`)
+
+> Note: GitHub pauses scheduled runs on a public repo after 60 days without commits; push a commit or re-enable from the Actions tab to resume.
+
+### Cost
+
+- This is a **public** repository, so GitHub-hosted standard runners are **free with unlimited minutes** (including the daily run)
+- Artifact storage is free for public repos and expires after 90 days by default
+- The GitHub Pages site and Supabase backend run on free tiers; tests issue only a few requests per run
+- **Effectively zero cost**
 
 ## Test Reporting & Failure Screenshots
 

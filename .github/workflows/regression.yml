@@ -7,6 +7,10 @@ on:
   pull_request:
     branches:
       - main
+  schedule:
+    # 03:30 Taiwan time daily (UTC 19:30), after the site's 02:00 data refresh.
+    - cron: "30 19 * * *"
+  workflow_dispatch:
 
 jobs:
   regression:
