@@ -20,6 +20,21 @@ BADGE = {
     "SKIP": ("#8c8c8c", "⏭️ SKIP"),
 }
 
+# Human-readable Chinese description for each test (keyed by test function name).
+DESCRIPTIONS = {
+    "test_frontend_site_is_reachable": "前端網站可正常連線（回應 200 HTML）",
+    "test_recommendation_api_is_available": "Supabase 推薦 API 可正常存取",
+    "test_latest_recommendation_has_valid_schema": "最新 AI 推薦資料結構正確（10 檔，每檔含代號／名稱／理由）",
+    "test_recommendation_numeric_fields_are_sane": "推薦數值欄位合理（股價＞0、殖利率≥0、本益比為數字）",
+    "test_request_without_apikey_is_rejected": "缺少 API 金鑰時正確回傳 401（權限保護）",
+    "test_recommendation_cards_show_key_metrics": "個股卡片顯示關鍵指標（殖利率／本益比／填息速度／填息率）",
+    "test_adding_favorite_requires_login": "點「加入收藏」會導向登入（收藏需登入）",
+    "test_login_is_coming_soon": "登入頁顯示「即將開放」狀態",
+    "test_friendly_error_when_data_source_unavailable": "資料來源中斷時顯示友善錯誤訊息、頁面不崩潰",
+    "test_home_page_loads_successfully": "首頁正常載入（標題、免責聲明、導覽列）",
+    "test_home_displays_expected_number_of_stock_cards": "首頁顯示預期數量（10 檔）的個股卡片",
+}
+
 
 def classify(testcase: ET.Element) -> tuple[str, str]:
     for child in testcase:
@@ -59,13 +74,21 @@ def build_html(cases: list[dict], totals: dict, meta: dict) -> str:
     rows = []
     for i, c in enumerate(cases, 1):
         color, label = BADGE.get(c["status"], ("#8c8c8c", c["status"]))
-        test = html.escape(f"{c['classname']}::{c['name']}" if c["classname"] else c["name"])
+        test_id = html.escape(f"{c['classname']}::{c['name']}" if c["classname"] else c["name"])
+        desc = DESCRIPTIONS.get(c["name"], "")
+        if desc:
+            test_cell = (
+                f'<div style="font-weight:600;">{html.escape(desc)}</div>'
+                f'<div style="color:#999;font-family:monospace;font-size:12px;">{test_id}</div>'
+            )
+        else:
+            test_cell = f'<span style="font-family:monospace;">{test_id}</span>'
         row = (
             f'<tr>'
-            f'<td style="padding:6px 10px;border-bottom:1px solid #eee;color:#666;">{i}</td>'
-            f'<td style="padding:6px 10px;border-bottom:1px solid #eee;font-family:monospace;">{test}</td>'
-            f'<td style="padding:6px 10px;border-bottom:1px solid #eee;color:{color};font-weight:600;white-space:nowrap;">{label}</td>'
-            f'<td style="padding:6px 10px;border-bottom:1px solid #eee;color:#666;text-align:right;">{c["time"]:.2f}s</td>'
+            f'<td style="padding:6px 10px;border-bottom:1px solid #eee;color:#666;vertical-align:top;">{i}</td>'
+            f'<td style="padding:6px 10px;border-bottom:1px solid #eee;">{test_cell}</td>'
+            f'<td style="padding:6px 10px;border-bottom:1px solid #eee;color:{color};font-weight:600;white-space:nowrap;vertical-align:top;">{label}</td>'
+            f'<td style="padding:6px 10px;border-bottom:1px solid #eee;color:#666;text-align:right;vertical-align:top;">{c["time"]:.2f}s</td>'
             f'</tr>'
         )
         rows.append(row)
