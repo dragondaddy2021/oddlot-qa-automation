@@ -6,6 +6,23 @@ Live application under test: https://dragondaddy2021.github.io/oddlot/
 
 Author: Teemo
 
+## 專案總覽 (Overview)
+
+為一個**真實上線**的 AI 零股推薦網站打造的自動化回歸測試框架,涵蓋 API 與 E2E 測試、CI/CD 每日自動執行、多種測試報告與 Email 通知,模擬實際公司導入自動化回歸的完整流程。
+
+An end-to-end test automation framework for a **live, deployed** AI odd-lot stock recommendation site — covering API and E2E tests, daily CI/CD execution, multiple report formats, and email notifications. It mirrors how a real engineering team adopts automated regression testing.
+
+### 一眼看懂 (At a Glance)
+
+| 面向 | 內容 |
+|------|------|
+| 🎯 被測系統 | [龍爹地的零股投資學習平台](https://dragondaddy2021.github.io/oddlot/)（GitHub Pages SPA + Supabase REST API） |
+| ✅ 測試覆蓋 | 11 項 — **API 5** + **E2E 6**（Playwright），對真實環境全綠 |
+| 🧱 框架 | Page Object Model · 設定外部化 · 失敗自動截圖 |
+| 📊 報告 | pytest-html · Allure · 失敗截圖 · **每日 Email 報告**（含類別 / 中文說明 / 結果 / 耗時） |
+| 🔁 CI/CD | GitHub Actions · 四種觸發（push / PR / 每日 03:30 TW / 手動）· 實質零成本 |
+| 🛠️ 技術 | Python · Pytest · Playwright · Requests · Allure |
+
 ## 專案定位 (Why This Project)
 
 這個作品集是我用來展示 **Senior SDET** 能力的專案,不只是寫幾支測試腳本,而是包含**測試架構、API 驗證、E2E 流程、CI/CD 執行、測試報告與失敗截圖**,模擬實際公司導入自動化回歸測試的流程。
