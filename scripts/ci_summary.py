@@ -36,6 +36,16 @@ DESCRIPTIONS = {
 }
 
 
+def category(classname: str) -> tuple[str, str]:
+    """Map a test's module path to a category badge (label, color)."""
+    cn = classname.lower()
+    if cn.startswith("tests.api") or ".api." in cn:
+        return "API", "#0969da"        # blue
+    if cn.startswith("tests.web") or ".web." in cn:
+        return "E2E", "#8250df"        # purple
+    return "其他", "#8c8c8c"
+
+
 def classify(testcase: ET.Element) -> tuple[str, str]:
     for child in testcase:
         tag = child.tag.lower()
@@ -71,9 +81,20 @@ def collect_cases() -> list[dict]:
 
 
 def build_html(cases: list[dict], totals: dict, meta: dict) -> str:
+    cat_counts: dict[str, int] = {}
+    for c in cases:
+        key = category(c["classname"])[0]
+        cat_counts[key] = cat_counts.get(key, 0) + 1
+    cat_summary = " · ".join(f"{k} {v}" for k, v in cat_counts.items())
+
     rows = []
     for i, c in enumerate(cases, 1):
         color, label = BADGE.get(c["status"], ("#8c8c8c", c["status"]))
+        cat, cat_color = category(c["classname"])
+        cat_cell = (
+            f'<span style="border:1px solid {cat_color};color:{cat_color};padding:1px 8px;'
+            f'border-radius:10px;font-size:12px;font-weight:600;white-space:nowrap;">{cat}</span>'
+        )
         test_id = html.escape(f"{c['classname']}::{c['name']}" if c["classname"] else c["name"])
         desc = DESCRIPTIONS.get(c["name"], "")
         if desc:
@@ -86,6 +107,7 @@ def build_html(cases: list[dict], totals: dict, meta: dict) -> str:
         row = (
             f'<tr>'
             f'<td style="padding:6px 10px;border-bottom:1px solid #eee;color:#666;vertical-align:top;">{i}</td>'
+            f'<td style="padding:6px 10px;border-bottom:1px solid #eee;vertical-align:top;">{cat_cell}</td>'
             f'<td style="padding:6px 10px;border-bottom:1px solid #eee;">{test_cell}</td>'
             f'<td style="padding:6px 10px;border-bottom:1px solid #eee;color:{color};font-weight:600;white-space:nowrap;vertical-align:top;">{label}</td>'
             f'<td style="padding:6px 10px;border-bottom:1px solid #eee;color:#666;text-align:right;vertical-align:top;">{c["time"]:.2f}s</td>'
@@ -95,7 +117,7 @@ def build_html(cases: list[dict], totals: dict, meta: dict) -> str:
         if c["status"] in ("FAIL", "ERROR") and c["detail"]:
             detail = html.escape(c["detail"][:500])
             rows.append(
-                f'<tr><td></td><td colspan="3" style="padding:4px 10px 10px;border-bottom:1px solid #eee;">'
+                f'<tr><td></td><td colspan="4" style="padding:4px 10px 10px;border-bottom:1px solid #eee;">'
                 f'<pre style="margin:0;white-space:pre-wrap;color:#cf222e;font-size:12px;">{detail}</pre></td></tr>'
             )
 
@@ -114,9 +136,11 @@ def build_html(cases: list[dict], totals: dict, meta: dict) -> str:
     &nbsp;|&nbsp; 略過 <b style="color:#8c8c8c;">{totals['skipped']}</b>
     &nbsp;|&nbsp; 共 {totals['total']} 項
   </p>
+  <p style="margin:0 0 12px;color:#666;">類別分布：{cat_summary}</p>
   <table style="border-collapse:collapse;width:100%;font-size:14px;">
     <thead><tr style="background:#f6f8fa;text-align:left;">
-      <th style="padding:8px 10px;">#</th><th style="padding:8px 10px;">測試項目</th>
+      <th style="padding:8px 10px;">#</th><th style="padding:8px 10px;">類別</th>
+      <th style="padding:8px 10px;">測試項目</th>
       <th style="padding:8px 10px;">結果</th><th style="padding:8px 10px;text-align:right;">耗時</th>
     </tr></thead>
     <tbody>{''.join(rows)}</tbody>
