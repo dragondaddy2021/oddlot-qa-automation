@@ -110,17 +110,11 @@ jobs:
           from: OddLot QA CI <${{ secrets.MAIL_USERNAME }}>
           to: ${{ secrets.MAIL_TO || secrets.MAIL_USERNAME }}
           subject: "OddLot QA 回歸 [${{ steps.summary.outputs.status }}] — ${{ steps.summary.outputs.passed }}/${{ steps.summary.outputs.total }} 通過"
+          # Rich per-test breakdown shown inline (built by scripts/ci_summary.py).
+          html_body: file://reports/email_body.html
+          # Plain-text fallback for clients that don't render HTML.
           body: |
             OddLot QA Automation — 每日回歸報告
-
-            結果：${{ steps.summary.outputs.status }}
-            總數：${{ steps.summary.outputs.total }}
-            通過：${{ steps.summary.outputs.passed }}
-            失敗：${{ steps.summary.outputs.failed }}
-            略過：${{ steps.summary.outputs.skipped }}
-
-            觸發方式：${{ github.event_name }}
+            結果 ${{ steps.summary.outputs.status }} | 通過 ${{ steps.summary.outputs.passed }} / ${{ steps.summary.outputs.total }} | 失敗 ${{ steps.summary.outputs.failed }} | 略過 ${{ steps.summary.outputs.skipped }}
             完整執行紀錄：${{ steps.summary.outputs.run_url }}
-
-            附件為 pytest-html 報告 (report.html)，可直接用瀏覽器開啟。
           attachments: reports/report.html
