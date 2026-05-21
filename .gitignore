@@ -1,0 +1,17 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.playwright/
+test-results/
+playwright-report/
+reports/*.html
+reports/*.xml
+reports/screenshots/*.png
+reports/allure-results/
+reports/allure-report/
+.DS_Store
+.claude/
+

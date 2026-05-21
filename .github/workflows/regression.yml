@@ -1,0 +1,87 @@
+name: Regression Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+
+    env:
+      # Tests run against the live, publicly deployed application.
+      BASE_URL: https://dragondaddy2021.github.io/oddlot
+      SUPABASE_URL: https://mmcoqujhhrltdaozfkwj.supabase.co
+      # Publishable (anon) key is embedded in the public site. Override with a
+      # repository secret if it is ever rotated.
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || 'sb_publishable_r3aGW9I-7L88V_4cAD-RzQ_BajY_hDU' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up Java (required by Allure CLI)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install Playwright browser
+        run: playwright install --with-deps chromium
+
+      - name: Install Allure commandline
+        run: npm install -g allure-commandline
+
+      - name: Create report directory
+        run: mkdir -p reports
+
+      - name: Run API and Web regression tests
+        run: pytest tests/api tests/web --html=reports/report.html --self-contained-html --alluredir=reports/allure-results
+
+      - name: Generate Allure report
+        if: always()
+        run: allure generate reports/allure-results -o reports/allure-report --clean
+
+      - name: Upload pytest-html report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-html-report
+          path: reports/report.html
+          if-no-files-found: error
+
+      - name: Upload Allure report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: reports/allure-report
+          if-no-files-found: ignore
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: reports/allure-results
+          if-no-files-found: ignore
+
+      - name: Upload failure screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-screenshots
+          path: reports/screenshots/*.png
+          if-no-files-found: ignore
